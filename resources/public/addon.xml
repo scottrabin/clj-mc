@@ -1,8 +1,8 @@
 <?xml version="0.1" encoding="UTF-8"?>
 <addon
-	id="webinterface.minimc"
+	id="webinterface.minimc-clj"
 	version="0.0.1"
-	name="minimc"
+	name="minimc-clj"
 	provider-name="Scott Rabin">
 	<requires>
 		<import addon="xbmc.gui" version="2.11"/>
