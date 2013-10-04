@@ -5,6 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>MiniMC - The Web Remote for XBMC</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="css/wexbmc.css" />
 </head>
 <body>
 
@@ -15,8 +16,11 @@
 <button type="button" data-command="Player.GetActivePlayers">Player.GetActivePlayers</button>
 <button type="button" data-command="VideoLibrary.GetTVShows">VideoLibrary.GetTVShows</button>
 
-<ul id="tvshows">
-</ul>
+<section class="screen" id="tvshows">
+	<ul></ul>
+</section>
+<section id="tvshow">
+</section>
 
 <script type="text/javascript" src="js/wexbmc.js"></script>
 

@@ -2,7 +2,8 @@
   (:require
     [cljs.core.async :refer [>! <!]]
     [wexbmc.jsonrpc.core :as rpc]
-    [wexbmc.type :refer [IUniqueIdentity IArtwork id]])
+    [wexbmc.util :refer [slug]]
+    [wexbmc.xbmc :refer [IUniqueIdentity id]])
   (:require-macros
     [cljs.core.async.macros :refer [go]]))
 
@@ -14,10 +15,7 @@
 
 (defrecord TVShow [title plot season episode showtitle tvshowid art]
   IUniqueIdentity
-  (id [this] tvshowid)
-  IArtwork
-  (banner [this] (->> art :banner js/encodeURI (str "/vfs/")))
-  (poster [this] (->> art :poster js/encodeURI (str "/vfs/"))))
+  (id [this] tvshowid))
 
 (defn fetch-all
   "Fetch all TV Shows"
@@ -25,7 +23,18 @@
   (go (let [result (<! (rpc/send-command "VideoLibrary.GetTVShows" {:properties Video-Fields-TVShow}))]
         (map map->TVShow (:tvshows result)))))
 
-(defn by-id
-  "Fetch a specific TV show by ID"
-  [tvshowid]
-  (go (first (filter #(= (id %) tvshowid) (<! (fetch-all))))))
+(defn by-slug
+  "Fetch a specific TV show by slug"
+  [shows sl]
+  (first (filter #(= sl (-> % :title slug)) shows)))
+
+; Asset retrieval methods
+(defn art-poster
+  "Get the asset path for a TV show's poster artwork"
+  [s]
+  (-> s :art :poster))
+
+(defn art-banner
+  "Get the asset path for a TV show's banner artwork"
+  [s]
+  (-> s :art :banner))

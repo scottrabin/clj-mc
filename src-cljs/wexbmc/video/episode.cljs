@@ -2,7 +2,8 @@
   (:require
     [cljs.core.async :refer [chan >!]]
     [wexbmc.jsonrpc.core :as rpc]
-    [wexbmc.type :refer [IUniqueIdentity]])
+    [wexbmc.util :refer [slug]]
+    [wexbmc.xbmc :refer [IUniqueIdentity id]])
   (:require-macros
     [cljs.core.async.macros :refer [go]]))
 
@@ -18,7 +19,18 @@
 
 (defn fetch-all
   "Get the episodes of a given TV show"
-  [tvshowid]
+  [tv-show]
   (go (let [result (<! (rpc/send-command "VideoLibrary.GetEpisodes" {:properties Video-Fields-Episode
-                                                                     :tvshowid tvshowid}))]
+                                                                     :tvshowid (id tv-show)}))]
         (map map->Episode (:episodes result)))))
+
+; Asset retrieval methods
+(defn art-poster
+  "Get the asset path for a TV show episode's poster artwork"
+  [e]
+  (-> e :art :thumb))
+
+(defn art-banner
+  "Get the asset path for a TV show episode's banner artwork"
+  [e]
+  (-> e :art :banner))

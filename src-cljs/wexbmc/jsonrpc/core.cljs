@@ -4,7 +4,7 @@
             [goog.json :as json])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def rpcid (atom 0))
+(def ^:private rpcid (atom 0))
 
 (defn- format-rpc-request-data
   "Translate a command & parameter map into a proper JS object to serialize"
