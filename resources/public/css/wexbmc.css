@@ -1,4 +1,4 @@
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* Styles for the TV Show display (season/episode selection) */
 #tvshow {
@@ -6,7 +6,7 @@
 }
 
 #tvshow .seasons {
-
+	white-space: nowrap;
 }
 
 #tvshow .seasons li {
@@ -40,10 +40,28 @@
 }
 
 #tvshow .episodes li {
+}
+
+#tvshow .episodes li a {
+	display: block;
 	overflow: hidden;
 }
 
 #tvshow .episodes li img {
 	float: left;
 	width: 120px;
+}
+
+@media (min-width: 786px) {
+	#tvshow .seasons {
+		float: left;
+		white-space: normal;
+	}
+	#tvshow .seasons li {
+		display: block;
+	}
+
+	#tvshow .episodes {
+		overflow: hidden;
+	}
 }
