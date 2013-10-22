@@ -11,7 +11,7 @@
 (defn- link-to-tv-show
   "Generate a hash link to a specific tv-show"
   [tv-show]
-  (str "#/tv-show/" (-> tv-show :title slug)))
+  (str "#/tv-shows/" (-> tv-show :title slug)))
 
 (defn- link-to-season
   "Generate a hash link to a specific season of a TV show"
