@@ -44,7 +44,7 @@
 
 (deftemplate -tv-show-episode-selector
   [tv-show episode]
-  [:li.episode
+  [:li.episode {:data-season (:season episode) :data-episode (:episode episode)}
    [:a.episode
     {:href (link-to-episode tv-show episode)}
     (img-asset (episode/art-poster episode))

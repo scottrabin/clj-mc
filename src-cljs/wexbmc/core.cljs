@@ -40,23 +40,33 @@
                    {:type :tvshows})]
       (doseq [show tv-shows]
         (append! (sel1 [:#tvshows :ul]) (wexbmc.views/tv-show-selector show)))
-      (loop []
-        (let [{:keys [type item] :as state} (<! routes)
-              active-pane (condp = type
-                            :tvshows "tvshows"
-                            :tvshow  "tvshow"
-                            nil)]
+      (loop [state {}]
+        (let [{:keys [type item] :as params} (<! routes)
+              newstate (merge state params)]
           ; toggle the visibility of the current state
           (doseq [screen (by-class :screen)]
-            (dommy.core/toggle! screen (= active-pane (dommy.core/attr screen :id))))
-          (cond
-            (= :tvshow type)
-            (do
-              ; clear out the previous show
-              (dommy.core/set-html! (by-id :tvshow) "")
-              (let [seasons (<! (season/fetch-all item))
-                    episodes (<! (episode/fetch-all item))]
-                (dommy.core/replace-contents! (sel1 [:#tvshow]) (wexbmc.views/tv-show-episode-selector item seasons episodes)))))
-          (recur))))))
+            (dommy.core/toggle! screen (= (name type) (dommy.core/attr screen :id))))
+          (recur
+            (condp = type
+              :tvshow
+              (if (= (:item state) item)
+                (do
+                  (doseq [episode (sel [:#tvshow :li.episode])]
+                    (dommy.core/toggle! episode (= (:season newstate) (-> episode (dommy.core/attr :data-season) int))))
+                  newstate)
+                (do
+                  (dommy.core/set-html! (by-id :tvshow) "")
+                  (let [episodes (<! (episode/fetch-all item))
+                        seasons  (<! (season/fetch-all item))
+                        season   (get params :season (-> seasons first :season))]
+                    (dommy.core/replace-contents! (by-id :tvshow) (wexbmc.views/tv-show-episode-selector item seasons episodes))
+                    (doseq [episode (sel [:#tvshow :li.episode])]
+                      (dommy.core/toggle! episode (= season (-> episode (dommy.core/attr :data-season) int))))
+                    {:item     item
+                     :episodes episodes
+                     :seasons  seasons
+                     :season   season})))
+
+              state)))))))
 
 (listen! js/window :load init)
