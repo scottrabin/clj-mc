@@ -20,6 +20,10 @@
     (dommy.core/toggle!
       episode
       (= season (-> episode (dommy.core/attr :data-season) int))))
+  (doseq [season-el (sel [:#tvshow :.season])]
+    (dommy.core/toggle-class! season-el
+                              "active"
+                              (= season (-> season-el (dommy.core/attr :data-season) int))))
   {:item     tvshow
    :seasons  seasons
    :episodes episodes

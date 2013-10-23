@@ -36,8 +36,8 @@
 ; privately used templates
 (deftemplate -tv-show-season-selector
   [tv-show season]
-  [:li.season
-   [:a.season
+  [:li.season {:data-season (:season season)}
+   [:a
     {:href (link-to-season tv-show season)}
     (img-asset (season/art-poster season))
     [:span.season--number (:season season)]]])
@@ -45,11 +45,13 @@
 (deftemplate -tv-show-episode-selector
   [tv-show episode]
   [:li.episode {:data-season (:season episode) :data-episode (:episode episode)}
-   [:a.episode
+   [:a
     {:href (link-to-episode tv-show episode)}
     (img-asset (episode/art-poster episode))
-    (:title episode)
-    (str "S: " (:season episode) " E: " (:episode episode))]])
+    [:div.episode--metadata
+     [:div.episode--serial (str "S: " (:season episode) " E: " (:episode episode))]
+     [:div.episode--airdate (:firstaired episode)]]
+    [:h3.episode--title (:title episode)]]])
 
 (deftemplate tv-show-selector
   [tv-show]
