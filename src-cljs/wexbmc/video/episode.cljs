@@ -20,9 +20,13 @@
 (defn fetch-all
   "Get the episodes of a given TV show"
   [tv-show]
-  (go (let [result (<! (rpc/send-command "VideoLibrary.GetEpisodes" {:properties Video-Fields-Episode
-                                                                     :tvshowid (id tv-show)}))]
-        (map map->Episode (:episodes result)))))
+  (go
+    (let [result (<! (rpc/send-command "VideoLibrary.GetEpisodes" {:properties Video-Fields-Episode
+                                                                   :tvshowid (id tv-show)}))]
+      (sort #(if (= (:season %1) (:season %2))
+               (- (:episode %1) (:episode %2))
+               (- (:season %1) (:season %2)))
+            (map map->Episode (:episodes result))))))
 
 ; Asset retrieval methods
 (defn art-poster

@@ -17,7 +17,7 @@
   (go
     (let [result (<! (rpc/send-command "VideoLibrary.GetSeasons" {:tvshowid (id tv-show)
                                                                   :properties Video-Fields-Season}))]
-      (map map->Season (:seasons result)))))
+      (sort-by :season (map map->Season (:seasons result))))))
 
 ; Asset retrieval methods
 (defn art-poster
