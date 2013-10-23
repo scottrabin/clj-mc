@@ -14,6 +14,25 @@
     [wexbmc.router :as router]
     [cljs.core.async.macros :refer [go]]))
 
+(defn display-tvshow
+  [tvshow seasons episodes season]
+  (doseq [episode (sel [:#tvshow :li.episode])]
+    (dommy.core/toggle!
+      episode
+      (= season (-> episode (dommy.core/attr :data-season) int))))
+  {:item     tvshow
+   :seasons  seasons
+   :episodes episodes
+   :season   season})
+
+(defn render-tvshow
+  [tvshow seasons episodes season]
+  (let [season (or season (-> seasons first :season))]
+    (dommy.core/replace-contents!
+      (by-id :tvshow)
+      (wexbmc.views/tv-show-episode-selector tvshow seasons episodes))
+    (display-tvshow tvshow seasons episodes season)))
+
 (defn- init
   []
   (go
@@ -50,22 +69,16 @@
             (condp = type
               :tvshow
               (if (= (:item state) item)
-                (do
-                  (doseq [episode (sel [:#tvshow :li.episode])]
-                    (dommy.core/toggle! episode (= (:season newstate) (-> episode (dommy.core/attr :data-season) int))))
-                  newstate)
+                (display-tvshow item
+                                (:seasons state)
+                                (:episodes state)
+                                (:season newstate))
                 (do
                   (dommy.core/set-html! (by-id :tvshow) "")
-                  (let [episodes (<! (episode/fetch-all item))
-                        seasons  (<! (season/fetch-all item))
-                        season   (get params :season (-> seasons first :season))]
-                    (dommy.core/replace-contents! (by-id :tvshow) (wexbmc.views/tv-show-episode-selector item seasons episodes))
-                    (doseq [episode (sel [:#tvshow :li.episode])]
-                      (dommy.core/toggle! episode (= season (-> episode (dommy.core/attr :data-season) int))))
-                    {:item     item
-                     :episodes episodes
-                     :seasons  seasons
-                     :season   season})))
+                  (render-tvshow item
+                                 (<! (season/fetch-all item))
+                                 (<! (episode/fetch-all item))
+                                 (:season params))))
 
               state)))))))
 
