@@ -10,7 +10,7 @@
     [wexbmc.views]
     [dommy.core :refer [append! attr value listen!]])
   (:require-macros
-    [dommy.macros :refer [sel sel1]]
+    [dommy.macros :refer [sel sel1 by-id by-class]]
     [wexbmc.router :as router]
     [cljs.core.async.macros :refer [go]]))
 
@@ -43,17 +43,20 @@
       (loop []
         (let [{:keys [type item] :as state} (<! routes)
               active-pane (condp = type
-                            :tvshows :tvshows
-                            :tvshow :tvshow
+                            :tvshows "tvshows"
+                            :tvshow  "tvshow"
                             nil)]
           ; toggle the visibility of the current state
-          (doseq [screen (sel :.screen)]
-            (dommy.core/toggle! screen (= (name active-pane) (dommy.core/attr screen :id))))
+          (doseq [screen (by-class :screen)]
+            (dommy.core/toggle! screen (= active-pane (dommy.core/attr screen :id))))
           (cond
             (= :tvshow type)
-            (let [seasons (<! (season/fetch-all item))
-                  episodes (<! (episode/fetch-all item))]
-              (dommy.core/replace-contents! (sel1 [:#tvshow]) (wexbmc.views/tv-show-episode-selector item seasons episodes))))
+            (do
+              ; clear out the previous show
+              (dommy.core/set-html! (by-id :tvshow) "")
+              (let [seasons (<! (season/fetch-all item))
+                    episodes (<! (episode/fetch-all item))]
+                (dommy.core/replace-contents! (sel1 [:#tvshow]) (wexbmc.views/tv-show-episode-selector item seasons episodes)))))
           (recur))))))
 
 (listen! js/window :load init)
