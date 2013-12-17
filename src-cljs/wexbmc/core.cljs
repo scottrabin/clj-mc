@@ -85,10 +85,10 @@
                       :item (get tv-shows show-slug)})
                    (#"/tv-shows/?"
                      []
-                     {:type :tvshows})
-                   {:type :tvshows})]
+                     {:type :tvshow-index})
+                   {:type :tvshow-index})]
       (doseq [[_ show] tv-shows]
-        (append! (sel1 [:#tvshows :ul]) (wexbmc.views/tv-show-selector show)))
+        (append! (sel1 [:#tvshow-index :ul]) (wexbmc.views/tv-show-selector show)))
       (doseq [[_ movie] movies]
         (append! (sel1 [:#movie-index :ul]) (wexbmc.views/movie-selector movie)))
       (loop [state {}]
