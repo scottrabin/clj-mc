@@ -1,12 +1,18 @@
 (ns wexbmc.views
   (:require
     [wexbmc.util :refer [slug]]
+    [wexbmc.video.movie :as movie]
     [wexbmc.video.tvshow :as tvshow]
     [wexbmc.video.season :as season]
     [wexbmc.video.episode :as episode]
     [wexbmc.xbmc :refer [id art-poster art-banner]])
   (:require-macros
     [dommy.macros :refer [node deftemplate]]))
+
+(defn- link-to-movie
+  "Generate a hash link to a specific movie"
+  [movie]
+  (str "#/movies/" (-> movie :title slug)))
 
 (defn- link-to-tv-show
   "Generate a hash link to a specific tv-show"
@@ -30,10 +36,25 @@
 
 (defn- img-asset
   "Generate an image tag for a given asset"
-  [ast]
-  [:img {:src (asset ast)}])
+  ([ast]
+   (img-asset ast {}))
+  ([ast attrs]
+   [:img (assoc attrs :src (asset ast))]))
 
 ; privately used templates
+(deftemplate -cast-member
+  [actor]
+  [:li.actor
+   [:a.actor--photo {:target "_blank" :href (str "http://www.imdb.com/find?s=nm&q=" (js/encodeURIComponent (:name actor)))}
+    (when-not (nil? (:thumbnail actor))
+      [:img {:alt (:name actor) :src (str "/vfs/" (-> actor :thumbnail js/encodeURI))}])]
+   [:a.actor--name {:target "_blank" :href (str "http://www.imdb.com/find?s=nm&q=" (js/encodeURIComponent (:name actor)))}
+    (:name actor)]
+   [:span.actor--role
+    " as "
+    [:a {:target "_blank" :href (str "http://www.imdb.com/find?s=nm&q=" (js/encodeURIComponent (:role actor)))}
+     (:role actor)]]])
+
 (deftemplate -tv-show-season-selector
   [tv-show season]
   [:li.season {:data-season (:season season)}
@@ -64,3 +85,18 @@
   (list
     [:ol.seasons (map #(-tv-show-season-selector tv-show %) seasons)]
     [:ol.episodes (map #(-tv-show-episode-selector tv-show %) episodes)]))
+
+(deftemplate movie-selector
+  [movie]
+  [:li.movie
+   [:a {:href (link-to-movie movie)}
+    (img-asset (movie/art-poster movie))]])
+
+(deftemplate movie-details
+  [movie]
+  [:div.movie
+   (img-asset (movie/art-poster movie) {:class "movie--poster"})
+   [:h3.movie-title (:title movie)]
+   [:p.plot (:plot movie)]
+   [:ul.cast
+    (for [member (:cast movie)] (-cast-member member))]])

@@ -2,6 +2,7 @@
   (:require
     [cljs.core.async :refer [<! chan alts! put!]]
     [wexbmc.jsonrpc.core :as rpc]
+    [wexbmc.video.movie :as movie]
     [wexbmc.video.tvshow :as tvshow]
     [wexbmc.video.season :as season]
     [wexbmc.video.episode :as episode]
@@ -37,11 +38,29 @@
       (wexbmc.views/tv-show-episode-selector tvshow seasons episodes))
     (display-tvshow tvshow seasons episodes season)))
 
+(defn display-movie
+  [movie])
+
+(defn render-movie
+  [movie]
+  (dommy.core/replace-contents!
+    (by-id :movie)
+    (wexbmc.views/movie-details movie))
+  (display-movie movie))
+
 (defn- init
   []
   (go
     (let [tv-shows (<! (tvshow/fetch-all))
+          movies (<! (movie/fetch-all))
           routes (router/route
+                   (#"/movies/([-a-z0-9]+)/?"
+                     [movie-slug]
+                     {:type :movie
+                      :item (get movies movie-slug)})
+                   (#"/movies/?"
+                     []
+                     {:type :movie-index})
                    (#"/tv-shows/([-a-z0-9]+)/S(\d+)E(\d+)(?:/.*)"
                      [show-slug season episode]
                      {:type :tvshow
@@ -63,6 +82,8 @@
                    {:type :tvshows})]
       (doseq [show tv-shows]
         (append! (sel1 [:#tvshows :ul]) (wexbmc.views/tv-show-selector show)))
+      (doseq [[_ movie] movies]
+        (append! (sel1 [:#movie-index :ul]) (wexbmc.views/movie-selector movie)))
       (loop [state {}]
         (let [{:keys [type item] :as params} (<! routes)
               newstate (merge state params)]
@@ -83,6 +104,13 @@
                                  (<! (season/fetch-all item))
                                  (<! (episode/fetch-all item))
                                  (:season params))))
+
+              :movie
+              (if (= (:item state) item)
+                (display-movie item)
+                (do
+                  (dommy.core/set-html! (by-id :movie) "")
+                  (render-movie item)))
 
               state)))))))
 

@@ -7,6 +7,13 @@ body {
 	color: #efefef;
 }
 
+a {
+	color: #429abe;
+}
+a:visited {
+	color: #a4b;
+}
+
 .screen {
 	position: absolute;
 	top: 40px;
@@ -93,6 +100,41 @@ body {
 #tvshow .episode--metadata {
 	float: right;
 	margin-right: 8px;
+}
+
+#movie {
+
+}
+
+#movie .movie--poster {
+	float: left;
+	margin: 0 20px 0 0;
+	max-height: 400px;
+}
+
+#movie .cast {
+	clear: both;
+}
+
+.cast .actor {
+	margin: 4px;
+}
+
+.cast .actor * {
+	line-height: 65px;
+	vertical-align: middle;
+}
+
+.cast .actor .actor--photo {
+	display: inline-block;
+	height: 65px;
+	width: 65px;
+	margin: 0 10px;
+	text-align: center;
+}
+
+.cast .actor .actor--photo img {
+	height: 100%;
 }
 
 @media (min-width: 786px) {
