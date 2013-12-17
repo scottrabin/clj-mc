@@ -20,13 +20,14 @@
 (defn fetch-all
   "Fetch all TV Shows"
   []
-  (go (let [result (<! (rpc/send-command "VideoLibrary.GetTVShows" {:properties Video-Fields-TVShow}))]
-        (map map->TVShow (:tvshows result)))))
-
-(defn by-slug
-  "Fetch a specific TV show by slug"
-  [shows sl]
-  (first (filter #(= sl (-> % :title slug)) shows)))
+  (go
+    (let [result (<! (rpc/send-command
+                       "VideoLibrary.GetTVShows"
+                       {:properties Video-Fields-TVShow}))]
+      (apply hash-map
+             (mapcat
+               #(list (slug (:title %)) (map->TVShow %))
+               (:tvshows result))))))
 
 ; Asset retrieval methods
 (defn art-poster

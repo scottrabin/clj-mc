@@ -71,23 +71,23 @@
                    (#"/tv-shows/([-a-z0-9]+)/S(\d+)E(\d+)(?:/.*)"
                      [show-slug season episode]
                      {:type :tvshow
-                      :item (tvshow/by-slug tv-shows show-slug)
+                      :item (get tv-shows show-slug)
                       :season (int season)
                       :episode (int episode)})
                    (#"/tv-shows/([-a-z0-9]+)/S(\d+)"
                      [show-slug season]
                      {:type :tvshow
-                      :item (tvshow/by-slug tv-shows show-slug)
+                      :item (get tv-shows show-slug)
                       :season (int season)})
                    (#"/tv-shows/([-a-z0-9]+)/?"
                      [show-slug]
                      {:type :tvshow
-                      :item (tvshow/by-slug tv-shows show-slug)})
+                      :item (get tv-shows show-slug)})
                    (#"/tv-shows/?"
                      []
                      {:type :tvshows})
                    {:type :tvshows})]
-      (doseq [show tv-shows]
+      (doseq [[_ show] tv-shows]
         (append! (sel1 [:#tvshows :ul]) (wexbmc.views/tv-show-selector show)))
       (doseq [[_ movie] movies]
         (append! (sel1 [:#movie-index :ul]) (wexbmc.views/movie-selector movie)))
