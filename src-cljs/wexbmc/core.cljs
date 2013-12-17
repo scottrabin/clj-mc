@@ -9,6 +9,7 @@
     [wexbmc.xbmc :refer [id]]
     [wexbmc.uri :refer [parse]]
     [wexbmc.views]
+    [wexbmc.remote :as remote]
     [dommy.core :refer [append! attr value listen!]])
   (:require-macros
     [dommy.macros :refer [sel sel1 by-id by-class]]
@@ -50,10 +51,16 @@
 
 (defn- init
   []
+  (listen! [(.-body js/document) "button[data-action]"] :click
+           (fn [evt]
+             ((remote/actions (attr (.-target evt) :data-action)))))
   (go
     (let [tv-shows (<! (tvshow/fetch-all))
           movies (<! (movie/fetch-all))
           routes (router/route
+                   (#"/remote"
+                     []
+                     {:type :remote})
                    (#"/movies/([-a-z0-9]+)/?"
                      [movie-slug]
                      {:type :movie
