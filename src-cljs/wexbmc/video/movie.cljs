@@ -32,4 +32,9 @@
 (defn art-poster
   "Get the asset path for a movie's poster artwork"
   [movie]
-  (-> movie :art :poster))
+  (str "/vfs/" (-> movie :art :poster js/encodeURI)))
+
+(defn link-to
+  "Get the canonical URL for a given movie"
+  [movie]
+  (str "#/movies/" (-> movie :title slug)))
