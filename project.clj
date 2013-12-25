@@ -3,8 +3,9 @@
   :license {:name "GPL v2"
             :url "http://www.gnu.org/licenses/gpl-2.0.txt"}
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/core.async "0.1.242.0-44b1e3-alpha"]
-                 [org.clojure/clojurescript "0.0-1909"]
+                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
+                 [org.clojure/clojurescript "0.0-2127"]
+                 [om "0.1.0-SNAPSHOT"]
                  [com.cemerick/clojurescript.test "0.0.4"]
                  [org.clojure/google-closure-library-third-party "0.0-2029"]
                  [prismatic/dommy "0.1.1"]]
@@ -25,29 +26,35 @@
                               "phantomjs-advanced"
                               ["runners/phantomjs.js" "target/cljs/run-tests-adv.js"]}
 
-              :builds
-              {:test-whitespace
-               {:source-paths ["src-cljs" "test-cljs"]
-                :compiler {:output-to "target/cljs/run-tests-ws.js"
-                           :optimizations :whitespace
-                           :pretty-print true}}
-               :test-simple
-               {:source-paths ["src-cljs" "test-cljs"]
-                :compiler {:output-to "target/cljs/run-tests-smpl.js"
-                           :optimizations :simple
-                           :pretty-print true}}
-               :test-advanced
-               {:source-paths ["src-cljs" "test-cljs"]
-                :compiler {:output-to "target/cljs/run-tests-adv.js"
-                           :optimizations :advanced
-                           :pretty-print true}}
-               :dev
-               {:source-paths ["src-cljs"]
-                :compiler {:output-to "resources/public/js/wexbmc.js"
-                           :optimizations :whitespace
-                           :pretty-print true}}
-               :prod
-               {:source-paths ["src-cljs"]
-                :compiler {:output-to "resources/public/js/wexbmc.js"
-                           :optimizations :advanced
-                           :pretty-print false}}}})
+              :builds [{:id "test-whitespace"
+                        :source-paths ["src-cljs" "test-cljs"]
+                        :compiler {:output-to "target/cljs/run-tests-ws.js"
+                                   :optimizations :whitespace
+                                   :pretty-print true}}
+                       {:id "test-simple"
+                        :source-paths ["src-cljs" "test-cljs"]
+                        :compiler {:output-to "target/cljs/run-tests-smpl.js"
+                                   :optimizations :simple
+                                   :pretty-print true}}
+                       {:id "test-advanced"
+                        :source-paths ["src-cljs" "test-cljs"]
+                        :compiler {:output-to "target/cljs/run-tests-adv.js"
+                                   :optimizations :advanced
+                                   :pretty-print true}}
+                       {:id "dev"
+                        :source-paths ["src-cljs"]
+                        :compiler {:output-to "resources/public/js/wexbmc.js"
+                                   :output-dir "out"
+                                   :externs ["react/externs/react.js"]
+                                   :optimizations :none
+                                   :source-map true
+                                   :pretty-print true}}
+                       {:id "prod"
+                        :source-paths ["src-cljs"]
+                        :compiler {:output-to "resources/public/js/wexbmc.js"
+                                   :externs ["react/externs/react.js"]
+                                   :optimizations :advanced
+                                   :pretty-print false
+                                   :preamble ["react/react.min.js"]
+                                   :closure-warnings
+                                   {:non-standard-jsdoc :off}}}]})
