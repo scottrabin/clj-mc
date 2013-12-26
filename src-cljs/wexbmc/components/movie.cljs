@@ -36,6 +36,9 @@
   "Component for selecting from a list of movies"
   [app data]
   (reify
+    om/IDidUpdate
+    (did-update [_ _ _ _ _]
+      (.scrollTo js/window 0 0))
     om/IRender
     (render [_ owner]
       (.log js/console "[ movie/index ] render:" (clj->js data))
@@ -49,6 +52,9 @@
   "Component for displaying a specific movie"
   [app data]
   (reify
+    om/IDidUpdate
+    (did-update [_ _ _ _ _]
+      (.scrollTo js/window 0 0))
     om/IRender
     (render [_ owner]
       (.log js/console "[ movie/view ] render:" (clj->js data))
