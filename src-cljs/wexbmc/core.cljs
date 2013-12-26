@@ -135,13 +135,13 @@
                       [movie-slug]
                       (fn [app]
                         (.log js/console (str "[ router ] Displaying movie '" movie-slug "'"))
-                        (om/update! app #(merge % {:active :movie
-                                                   :item (get-in % [:data movie-slug])}))))
+                        (om/update! app [:data] #(merge % {:type :movie
+                                                           :item movie-slug}))))
                     (#"/movies/?"
                       []
                       (fn [app]
                         (.log js/console "[ router ] Displaying movie index")
-                        (om/update! app #(assoc % :active :movie-index))))
+                        (om/update! app [:data] #(assoc % :type :movie-index))))
                     (#"/tv-shows/([-a-z0-9]+)/S(\d+)E(\d+)(?:/.*)"
                       [show-slug season episode]
                       {:type :tvshow

@@ -40,6 +40,16 @@
       (.log js/console "[ app/main ] updated in" (- (.valueOf (now)) (.valueOf render-start)) "ms"))
     om/IRender
     (render [_ owner]
+      (.log js/console "[ app/main ] render:" data)
       (dom/div nil
-               (om/build movie/index app
-                         {:path [] :opts {:movies (:movies data)}})))))
+               (case (:type data)
+                 :movie
+                 (om/build movie/view app
+                           {:path [] :opts data})
+
+                 :movie-index
+                 (om/build movie/index app
+                           {:path [] :opts data})
+
+                 :default
+                 "error")))))
