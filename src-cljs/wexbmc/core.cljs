@@ -130,7 +130,9 @@
           :routes (router/route
                     (#"/remote"
                       []
-                      {:type :remote})
+                      (fn [app]
+                        (.log js/console (str "[ router ] Displaying remote"))
+                        (om/update! app [:data] #(assoc % :type :remote))))
                     (#"/movies/([-a-z0-9]+)/?"
                       [movie-slug]
                       (fn [app]

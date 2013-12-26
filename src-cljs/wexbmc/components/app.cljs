@@ -4,6 +4,7 @@
   (:require
     [wexbmc.video.movie]
     [wexbmc.components.movie :as movie]
+    [wexbmc.components.remote :as remote]
     [cljs.core.async :refer [<! chan put!]]
     [om.core :as om :include-macros true]
     [om.dom :as dom :include-macros true]))
@@ -42,14 +43,19 @@
     (render [_ owner]
       (.log js/console "[ app/main ] render:" data)
       (dom/div nil
-               (case (:type data)
+               (dom/nav #js {:id "top-navigation"}
+                        (dom/a #js {:href "#/remote"} "Remote")
+                        (dom/a #js {:href "#/tv-shows"} "TV Shows")
+                        (dom/a #js {:href "#/movies"} "Movies"))
+               (case (get data :type :remote)
+                 :remote
+                 (om/build remote/remote app
+                           {:path [:player] :opts data})
+
                  :movie
                  (om/build movie/view app
                            {:path [] :opts data})
 
                  :movie-index
                  (om/build movie/index app
-                           {:path [] :opts data})
-
-                 :default
-                 "error")))))
+                           {:path [] :opts data}))))))
