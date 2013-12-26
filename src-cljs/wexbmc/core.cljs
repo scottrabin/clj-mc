@@ -126,49 +126,40 @@
 
 ;(listen! js/window :load init)
 
-(defn command-initialize
-  "Initialize the application"
-  [app app-data]
-  (.debug js/console "command: initialize")
-  (go (merge app-data {:message "command: initialize"
-                       :movies (<! (movie/fetch-all))})))
-
-(let [event-queue (chan)
-      app (om/root {:event-queue event-queue} wex-app/main (.-body js/document))
-      routes (router/route
-               (#"/remote"
-                 []
-                 {:type :remote})
-               (#"/movies/([-a-z0-9]+)/?"
-                 [movie-slug]
-                 {:type :movie
-                  :item movie-slug})
-               (#"/movies/?"
-                 []
-                 {:type :movie-index})
-               (#"/tv-shows/([-a-z0-9]+)/S(\d+)E(\d+)(?:/.*)"
-                 [show-slug season episode]
-                 {:type :tvshow
-                  :item show-slug
-                  :season (int season)
-                  :episode (int episode)})
-               (#"/tv-shows/([-a-z0-9]+)/S(\d+)"
-                 [show-slug season]
-                 {:type :tvshow
-                  :item show-slug
-                  :season (int season)})
-               (#"/tv-shows/([-a-z0-9]+)/?"
-                 [show-slug]
-                 {:type :tvshow
-                  :item show-slug})
-               (#"/tv-shows/?"
-                 []
-                 {:type :tvshow-index})
-               {:type :tvshow-index})]
-  (go (loop []
-        (>! event-queue (<! routes))))
-  (go (loop [app-data {}
-             command command-initialize]
-        (recur
-          (om/set-state! app [:data] (<! (command app app-data)))
-          (<! event-queue)))))
+(om/root {:data {}
+          :routes (router/route
+                    (#"/remote"
+                      []
+                      {:type :remote})
+                    (#"/movies/([-a-z0-9]+)/?"
+                      [movie-slug]
+                      (fn [app]
+                        (.log js/console (str "[ router ] Displaying movie '" movie-slug "'"))
+                        (om/update! app #(merge % {:active :movie
+                                                   :item (get-in % [:data movie-slug])}))))
+                    (#"/movies/?"
+                      []
+                      (fn [app]
+                        (.log js/console "[ router ] Displaying movie index")
+                        (om/update! app #(assoc % :active :movie-index))))
+                    (#"/tv-shows/([-a-z0-9]+)/S(\d+)E(\d+)(?:/.*)"
+                      [show-slug season episode]
+                      {:type :tvshow
+                       :item show-slug
+                       :season (int season)
+                       :episode (int episode)})
+                    (#"/tv-shows/([-a-z0-9]+)/S(\d+)"
+                      [show-slug season]
+                      {:type :tvshow
+                       :item show-slug
+                       :season (int season)})
+                    (#"/tv-shows/([-a-z0-9]+)/?"
+                      [show-slug]
+                      {:type :tvshow
+                       :item show-slug})
+                    (#"/tv-shows/?"
+                      []
+                      {:type :tvshow-index})
+                    {:type :tvshow-index})}
+         wex-app/main
+         js/document.body)

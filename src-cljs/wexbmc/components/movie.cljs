@@ -18,7 +18,7 @@
   (reify
     om/IRender
     (render [_ owner]
-      (.debug js/console "[movie/index] IRender:" (clj->js data))
+      (.log js/console "[ movie/index ] render:" (clj->js data))
       (dom/ul #js {:id "movie-list"}
                    (into-array
                      (map
