@@ -1,6 +1,7 @@
 (ns wexbmc.video.episode
   (:require
     [cljs.core.async :refer [chan >!]]
+    [wexbmc.video.tvshow]
     [wexbmc.jsonrpc.core :as rpc]
     [wexbmc.util :refer [slug]]
     [wexbmc.xbmc :refer [IUniqueIdentity id]])
@@ -38,3 +39,8 @@
   "Get the asset path for a TV show episode's banner artwork"
   [e]
   (-> e :art :banner))
+
+(defn link-to
+  "Generate a hash link to a specific episode of a TV show"
+  [tv-show episode]
+  (str (wexbmc.video.tvshow/link-to tv-show) "/S" (:season episode) "E" (:episode episode) "/" (-> episode :title slug)))

@@ -1,5 +1,6 @@
 (ns wexbmc.video.season
   (:require
+    [wexbmc.video.tvshow]
     [wexbmc.xbmc :refer [id] :as xbmc]
     [wexbmc.jsonrpc.core :as rpc])
   (:require-macros
@@ -23,9 +24,14 @@
 (defn art-poster
   "Get the asset path for a season's poster artwork"
   [s]
-  (-> s :art :poster))
+  (str "/vfs/" (-> s :art :poster js/encodeURI)))
 
 (defn art-banner
   "Get the asset path for a season's banner artwork"
   [s]
-  (-> s :art :banner))
+  (str "/vfs/" (-> s :art :banner js/encodeURI)))
+
+(defn link-to
+  "Generate a hash link to a specific season of a TV show"
+  [tv-show season]
+  (str (wexbmc.video.tvshow/link-to tv-show) "/S" (:season season)))

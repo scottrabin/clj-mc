@@ -33,9 +33,14 @@
 (defn art-poster
   "Get the asset path for a TV show's poster artwork"
   [s]
-  (-> s :art :poster))
+  (str "/vfs/" (-> s :art :poster js/encodeURI)))
 
 (defn art-banner
   "Get the asset path for a TV show's banner artwork"
   [s]
-  (-> s :art :banner))
+  (str "/vfs/" (-> s :art :banner js/encodeURI)))
+
+(defn link-to
+  "Generate a hash link to a specific tv-show"
+  [tv-show]
+  (str "#/tv-shows/" (-> tv-show :title slug)))

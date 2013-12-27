@@ -126,42 +126,71 @@
 
 ;(listen! js/window :load init)
 
+(defn ^:private fetch-tvshow-seasons
+  "Fetch the seasons for a TV show or use the cached variants"
+  [app show-slug]
+  (.debug js/console "data:" app)
+  (let [tvshow (get-in app [:data :tvshows show-slug])
+        seasons (get-in app [:data :seasons show-slug])]
+    (.debug js/console "Seasons:" seasons)
+    (when (nil? seasons)
+      (.debug js/console (str "[ core ] Fetching seasons for '" show-slug "'") tvshow)
+      (go
+        (let [seasons (<! (season/fetch-all tvshow))])
+        (om/update! app [:data]
+                    #(assoc-in % [:seasons show-slug] seasons))))))
+
 (om/root {:data {}
           :routes (router/route
                     (#"/remote"
                       []
-                      (fn [app]
+                      (fn [app owner]
                         (.log js/console (str "[ router ] Displaying remote"))
                         (om/update! app [:data] #(assoc % :type :remote))))
                     (#"/movies/([-a-z0-9]+)/?"
                       [movie-slug]
-                      (fn [app]
+                      (fn [app owner]
                         (.log js/console (str "[ router ] Displaying movie '" movie-slug "'"))
                         (om/update! app [:data] #(merge % {:type :movie
                                                            :item movie-slug}))))
                     (#"/movies/?"
                       []
-                      (fn [app]
+                      (fn [app owner]
                         (.log js/console "[ router ] Displaying movie index")
                         (om/update! app [:data] #(assoc % :type :movie-index))))
                     (#"/tv-shows/([-a-z0-9]+)/S(\d+)E(\d+)(?:/.*)"
                       [show-slug season episode]
-                      {:type :tvshow
-                       :item show-slug
-                       :season (int season)
-                       :episode (int episode)})
+                      (fn [app owner]
+                        (.log js/console (str "[ router ] Displaying '" show-slug "' S" season "E" episode))
+                        (fetch-tvshow-seasons app show-slug)
+                        (om/update! app [:data] #(merge % {:type :tvshow-episode
+                                                           :item {:name show-slug
+                                                                  :season (int season)
+                                                                  :episode (int episode)}}))))
                     (#"/tv-shows/([-a-z0-9]+)/S(\d+)"
                       [show-slug season]
-                      {:type :tvshow
-                       :item show-slug
-                       :season (int season)})
+                      (fn [app owner]
+                        (.log js/console (str "[ router ] Displaying '" show-slug "' season " season))
+                        (fetch-tvshow-seasons app show-slug)
+                        (om/update! app [:data] #(merge % {:type :tvshow-episode-index
+                                                           :item {:name show-slug
+                                                                  :season (int season)}}))))
                     (#"/tv-shows/([-a-z0-9]+)/?"
                       [show-slug]
-                      {:type :tvshow
-                       :item show-slug})
+                      (fn [app owner]
+                        (.log js/console (str "[ router ] Displaying '" show-slug "'"))
+                        (fetch-tvshow-seasons app show-slug)
+                        (om/update! app [:data] #(merge % {:type :tvshow-episode-index
+                                                           :item {:name show-slug
+                                                                  :season 1}}))))
                     (#"/tv-shows/?"
                       []
-                      {:type :tvshow-index})
-                    {:type :tvshow-index})}
+                      (fn [app owner]
+                        (.log js/console (str "[ router ] Displaying TV shows"))
+                        (om/update! app [:data] #(assoc % :type :tvshow-index))))
+
+                    (fn [app owner]
+                      (.warn js/console "[ router ] No matching route; defaulting to remote")
+                      (om/update! app [:data] #(assoc % :type :remote))))}
          wex-app/main
          js/document.body)
