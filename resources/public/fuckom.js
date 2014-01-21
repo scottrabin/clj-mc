@@ -183,7 +183,7 @@ var Route = function(destination) {
 				episode: parseInt(m[3], 10)
 			}
 		};
-	} else if (m = (/\/tv-shows\/([-a-z0-9]+)\/S(\d{2})\//).exec(destination)) {
+	} else if (m = (/\/tv-shows\/([-a-z0-9]+)\/S(\d{2})\/?/).exec(destination)) {
 		return {
 			active: {
 				type: "tvshow-episode-index",
@@ -273,15 +273,15 @@ var RootComponent = React.createClass({
 					href: "#/remote"
 				}, "Remote"),
 				React.DOM.a({
-					className: (["tvshow-index", "tvshow-episode-index", "tvshow-episode-detail"].indexOf(this.state.active.type) > -1
-								? "active"
-								: ""),
+					className: toClassName({
+						"active": (["tvshow-index", "tvshow-episode-index", "tvshow-episode-detail"].indexOf(this.state.active.type) > -1)
+					}),
 					href: "#/tv-shows"
 				}, "TV Shows"),
 				React.DOM.a({
-					className: (["movie-index", "movie-detail"].indexOf(this.state.active.type) > -1
-								? "active"
-								: ""),
+					className: toClassName({
+						"active": (["movie-index", "movie-detail"].indexOf(this.state.active.type) > -1)
+					}),
 					href: "#/movies"
 				}, "Movies")
 			),
@@ -375,7 +375,10 @@ var TVShowIndex = React.createClass({
 
 		return React.DOM.li(
 			{
-				className: "season"
+				className: toClassName({
+					"season": true,
+					"active": (this.props.active.season === season.season)
+				})
 			},
 			React.DOM.a(
 				{
@@ -396,7 +399,10 @@ var TVShowIndex = React.createClass({
 
 		return React.DOM.li(
 			{
-				className: "episode"
+				className: toClassName({
+					"episode": true,
+					"hidden": (episode.season !== this.props.active.season)
+				})
 			},
 			React.DOM.a(
 				{
