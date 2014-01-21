@@ -342,7 +342,7 @@ var MovieIndex = React.createClass({
 					},
 					React.DOM.img({src: toAssetSource(movie.art.poster)}),
 					React.DOM.span(
-						{className: "movie-name"},
+						{className: "movie--name"},
 						movie.title
 					)
 				)

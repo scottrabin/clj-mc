@@ -1,0 +1,13 @@
+$site-width: 420px;
+
+@mixin small-screen {
+	@media only screen and (max-width: $site-width) {
+		@content;
+	}
+}
+
+@mixin big-screen {
+	@media only screen and (min-width: $site-width) {
+		@content;
+	}
+}
