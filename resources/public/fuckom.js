@@ -112,11 +112,10 @@ var Season = {
 		}).then(function(response) {
 			console.log("[ Season.fetch ] response:", response);
 
-			return response.result.seasons.reduce(function(r, season) {
-				r[season.season] = season;
-				return r;
-			}, {});
-		})
+			return response.result.seasons.sort(function(a, b) {
+				return (a.season - b.season);
+			});
+		});
 	},
 	linkTo: function(tvshow, season) {
 		return TVShow.linkTo(tvshow) + '/S' + leftPad(season.season);
@@ -137,7 +136,12 @@ var Episode = {
 		}).then(function(response) {
 			console.log("[ Episode.fetch ] response:", response);
 
-			return response.result.episodes;
+			return response.result.episodes.sort(function(a, b) {
+				if (a.season !== b.season) {
+					return (a.season - b.season);
+				}
+				return (a.episode - b.episode);
+			});
 		})
 	},
 	linkTo: function(tvshow, episode) {
@@ -348,9 +352,10 @@ var MovieIndex = React.createClass({
 				"active": (this.props.active.type === 'movie-index')
 			})
 		},
-		$.map(this.props.movies, function(movie) {
+		$.map(this.props.movies, function(movie, slug) {
 			return React.DOM.li(
 				{
+					key: slug,
 					className: "movie"
 				},
 				React.DOM.a(
@@ -390,17 +395,21 @@ var TVShowIndex = React.createClass({
 		}
 	},
 	setActiveSeason: function(props) {
+		var season;
+		if (props.active.hasOwnProperty('season')) {
+			season = props.active.season;
+		} else if (props.seasons[props.active.item]) {
+			season = props.seasons[props.active.item][first(props.seasons[props.active.item])].season;
+		}
 		this.setState({
-			season: +(props.active.hasOwnProperty('season')
-					  ? props.active.season
-					  : first(props.seasons[props.active.item] || [])
-					 )
+			season: +season
 		});
 	},
 	renderTVShowIndex: function() {
-		return $.map(this.props.tvshows, function(tvshow) {
+		return $.map(this.props.tvshows, function(tvshow, slug) {
 			return React.DOM.li(
 				{
+					key: slug,
 					className: "tvshow"
 				},
 				React.DOM.a(
@@ -417,6 +426,7 @@ var TVShowIndex = React.createClass({
 
 		return React.DOM.li(
 			{
+				key: (this.props.active.item + "--S" + leftPad(season.season, 2)),
 				className: toClassName({
 					"season": true,
 					"active": (this.state.season === season.season)
@@ -441,6 +451,7 @@ var TVShowIndex = React.createClass({
 
 		return React.DOM.li(
 			{
+				key: (this.props.active.item + "--S" + leftPad(episode.season, 2) + "E" + leftPad(episode.episode, 2)),
 				className: toClassName({
 					"episode": true,
 					"hidden": (this.state.season !== episode.season)
@@ -469,21 +480,23 @@ var TVShowIndex = React.createClass({
 		);
 	},
 	renderTVShowEpisodeIndex: function() {
-		var seasons = this.props.seasons[this.props.active.item];
-		var episodes = this.props.episodes[this.props.active.item];
+		var seasons = this.props.seasons[this.props.active.item] || [];
+		var episodes = this.props.episodes[this.props.active.item] || [];
 
 		return [
 			React.DOM.ol(
 				{
+					key: (this.props.active.item + "--seasons"),
 					className: "seasons"
 				},
-				$.map(seasons || [], this.renderSeason, this)
+				seasons.map(this.renderSeason, this)
 			),
 			React.DOM.ol(
 				{
+					key: (this.props.active.item + "--episodes"),
 					className: "episodes"
 				},
-				$.map(episodes || [], this.renderEpisode, this)
+				episodes.map(this.renderEpisode, this)
 			)
 		];
 	},
