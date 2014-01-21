@@ -78,4 +78,25 @@
 			margin-right: 8px;
 		}
 	}
+
+	@include big-screen {
+		.seasons {
+			float: left;
+			white-space: normal;
+			height: 100%;
+			padding-right: 10px;
+			overflow: auto;
+			overflow-x: hidden;
+
+			li {
+				display: block;
+			}
+		}
+
+		.episodes {
+			height: 100%;
+			overflow: auto;
+			overflow-x: hidden;
+		}
+	}
 }

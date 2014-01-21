@@ -39,34 +39,14 @@ a:visited {
 @import "_cast.scss";
 @import "_movie_view.scss";
 
-@media (min-width: 786px) {
-	::-webkit-scrollbar {
-		width: 10px;
-	}
-	::-webkit-scrollbar-track {
-		box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-	}
-	::-webkit-scrollbar-thumb {
-		background: #555555;
-		box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
-		border-radius: 5px;
-	}
-
-	#tvshow-index .seasons {
-		float: left;
-		white-space: normal;
-		height: 100%;
-		padding-right: 10px;
-		overflow: auto;
-		overflow-x: hidden;
-	}
-	#tvshow-index .seasons li {
-		display: block;
-	}
-
-	#tvshow-index .episodes {
-		height: 100%;
-		overflow: auto;
-		overflow-x: hidden;
-	}
+::-webkit-scrollbar {
+	width: 10px;
+}
+::-webkit-scrollbar-track {
+	box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+::-webkit-scrollbar-thumb {
+	background: #555555;
+	box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+	border-radius: 5px;
 }
