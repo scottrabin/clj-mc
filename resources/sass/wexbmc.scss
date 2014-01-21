@@ -23,7 +23,11 @@ a:visited {
 
 .screen {
 	display: none;
-	width: 100%;
+	position: absolute;
+	top: 60px;
+	right: 0;
+	bottom: 0;
+	left: 0;
 }
 
 .screen.active {

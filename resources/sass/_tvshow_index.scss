@@ -1,14 +1,28 @@
 /* Styles for the TV Show display (season/episode selection) */
 #tvshow-index {
 	.tvshow {
-		&, a, img {
+		&, a {
+			display: block;
+		}
+		img {
 			width: 100%;
 		}
-
 	}
 
 	.seasons {
 		white-space: nowrap;
+		overflow: auto;
+
+		@include small-screen {
+			overflow-y: hidden;
+		}
+		@include big-screen {
+			float: left;
+			white-space: normal;
+			height: 100%;
+			padding-right: 10px;
+			overflow-x: hidden;
+		}
 	}
 
 	.season {
@@ -26,6 +40,10 @@
 
 		&.active {
 			opacity: 1;
+		}
+
+		@include big-screen {
+			display: block;
 		}
 
 		img {
@@ -46,6 +64,14 @@
 			border-radius: 100%;
 			font-weight: bold;
 			text-align: center;
+		}
+	}
+
+	.episodes {
+		@include big-screen {
+			height: 100%;
+			overflow: auto;
+			overflow-x: hidden;
 		}
 	}
 
@@ -83,27 +109,6 @@
 		.episode--metadata {
 			float: right;
 			margin-right: 8px;
-		}
-	}
-
-	@include big-screen {
-		.seasons {
-			float: left;
-			white-space: normal;
-			height: 100%;
-			padding-right: 10px;
-			overflow: auto;
-			overflow-x: hidden;
-
-			li {
-				display: block;
-			}
-		}
-
-		.episodes {
-			height: 100%;
-			overflow: auto;
-			overflow-x: hidden;
 		}
 	}
 }
