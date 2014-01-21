@@ -5,6 +5,17 @@ var assoc = function(obj, key, val) {
 	o[key] = val;
 	return $.extend(o, obj);
 };
+var first = function(coll) {
+	if ($.isPlainObject(coll) || $.isArray(coll)) {
+		for (var p in coll) {
+			if (coll.hasOwnProperty(p)) {
+				return p;
+			}
+		}
+		return null;
+	}
+	throw new Error("Invalid collection given to `first`: " + JSON.stringify(coll));
+}
 var indexOf = function(coll, testFn, thisObj) {
 	var $this = thisObj || null;
 	for (var i = 0; i < coll.length; i++) {
@@ -360,9 +371,11 @@ var MovieIndex = React.createClass({
 var TVShowIndex = React.createClass({
 	componentWillMount: function() {
 		this.fetchEpisodeData(this.props);
+		this.setActiveSeason(this.props);
 	},
 	componentWillReceiveProps: function(nextProps) {
 		this.fetchEpisodeData(nextProps);
+		this.setActiveSeason(nextProps);
 	},
 	fetchEpisodeData: function(props) {
 		var tvshow = props.tvshows[props.active.item];
@@ -375,6 +388,14 @@ var TVShowIndex = React.createClass({
 		if (tvshow && !episodes) {
 			props.fetchEpisodes(tvshow);
 		}
+	},
+	setActiveSeason: function(props) {
+		this.setState({
+			season: +(props.active.hasOwnProperty('season')
+					  ? props.active.season
+					  : first(props.seasons[props.active.item] || [])
+					 )
+		});
 	},
 	renderTVShowIndex: function() {
 		return $.map(this.props.tvshows, function(tvshow) {
@@ -398,7 +419,7 @@ var TVShowIndex = React.createClass({
 			{
 				className: toClassName({
 					"season": true,
-					"active": (this.props.active.season === season.season)
+					"active": (this.state.season === season.season)
 				})
 			},
 			React.DOM.a(
@@ -422,7 +443,7 @@ var TVShowIndex = React.createClass({
 			{
 				className: toClassName({
 					"episode": true,
-					"hidden": (episode.season !== this.props.active.season)
+					"hidden": (this.state.season !== episode.season)
 				})
 			},
 			React.DOM.a(
