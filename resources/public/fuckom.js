@@ -23,7 +23,10 @@ var toSlug = function(str) {
 		replace(/^-+|-+$/g, "");
 };
 var toAssetSource = function(asset) {
-	return "/vfs/" + encodeURI(asset);
+	return (asset
+			? "/vfs/" + encodeURI(asset)
+			: null
+		   );
 };
 var toClassName = function(o) {
 	var r;
@@ -470,25 +473,29 @@ var NowPlaying = React.createClass({
 			return React.DOM.div();
 		}
 
-		return React.DOM.div(
-			{
-				id: "movie-view",
-				className: "movie"
-			},
-			React.DOM.img({
-				className: "movie--poster",
-				src: toAssetSource(movie.art.poster)
-			}),
-			React.DOM.h3({
-				className: "movie--title"
-			}, movie.title),
-			React.DOM.p({
-				className: "plot"
-			}, movie.plot),
+		return [
+			React.DOM.div(
+				{
+					key: "movie-view",
+					id: "movie-view",
+					className: "movie"
+				},
+				React.DOM.img({
+					className: "movie--poster",
+					src: toAssetSource(movie.art.poster)
+				}),
+				React.DOM.h3({
+					className: "movie--title"
+				}, movie.title),
+				React.DOM.p({
+					className: "plot"
+				}, movie.plot)
+			),
 			CastList({
+				key: "cast",
 				cast: movie.cast
 			})
-		);
+		];
 	},
 	renderEpisode: function() {
 		var episode = find(this.props.episodes[this.props.active.item] || [], function(episode) {
@@ -537,9 +544,34 @@ var CastList = React.createClass({
 			this.props.cast.map(function(actor) {
 				return React.DOM.li(
 					{
+						className: "actor"
 					},
-					React.DOM.img({src: ""}),
-					React.DOM.span(actor.name)
+					React.DOM.a(
+						{
+							className: "actor--photo",
+							href: "http://www.imdb.com/find?s=nm&q=" + encodeURIComponent(actor.name)
+						},
+						React.DOM.img({
+							className: toClassName({
+								"hidden": !actor.thumbnail
+							}),
+							alt: actor.name,
+							src: toAssetSource(actor.thumbnail)
+						})
+					),
+					React.DOM.a(
+						{
+							href: "http://www.imdb.com/find?s=nm&q=" + encodeURIComponent(actor.name)
+						},
+						actor.name
+					),
+					" as ",
+					React.DOM.a(
+						{
+							href: "http://www.imdb.com/find?s=nm&q=" + encodeURIComponent(actor.role)
+						},
+						actor.role
+					)
 				);
 			}, this)
 		);

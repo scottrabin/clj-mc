@@ -1,7 +1,9 @@
 // Styles for the Movie selection display
 @import "_mixins.scss";
 
-#now-playing.movie {
+#movie-view {
+	overflow: hidden;
+
 	.movie--poster {
 		float: left;
 		margin: 0 20px 0 0;
@@ -10,9 +12,5 @@
 
 	.movie--title {
 		font-size: 30px;
-	}
-
-	.cast {
-		clear: both;
 	}
 }
