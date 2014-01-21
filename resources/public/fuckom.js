@@ -5,14 +5,14 @@ var assoc = function(obj, key, val) {
 	o[key] = val;
 	return $.extend(o, obj);
 };
-var find = function(coll, testFn, thisObj) {
+var indexOf = function(coll, testFn, thisObj) {
 	var $this = thisObj || null;
 	for (var i = 0; i < coll.length; i++) {
 		if (testFn.call($this, coll[i], i, coll)) {
-			return coll[i];
+			return i;
 		}
 	}
-	return null;
+	return -1;
 };
 var leftPad = function(num) {
 	return (num < 10 ? '0' : '') + num;
@@ -355,6 +355,24 @@ var MovieIndex = React.createClass({
 });
 
 var TVShowIndex = React.createClass({
+	componentWillMount: function() {
+		this.fetchEpisodeData(this.props);
+	},
+	componentWillReceiveProps: function(nextProps) {
+		this.fetchEpisodeData(nextProps);
+	},
+	fetchEpisodeData: function(props) {
+		var tvshow = props.tvshows[props.active.item];
+		var seasons = props.seasons[props.active.item];
+		var episodes = props.episodes[props.active.item];
+
+		if (tvshow && !seasons) {
+			props.fetchSeasons(tvshow);
+		}
+		if (tvshow && !episodes) {
+			props.fetchEpisodes(tvshow);
+		}
+	},
 	renderTVShowIndex: function() {
 		return $.map(this.props.tvshows, function(tvshow) {
 			return React.DOM.li(
@@ -427,16 +445,8 @@ var TVShowIndex = React.createClass({
 		);
 	},
 	renderTVShowEpisodeIndex: function() {
-		var tvshow = this.props.tvshows[this.props.active.item];
 		var seasons = this.props.seasons[this.props.active.item];
 		var episodes = this.props.episodes[this.props.active.item];
-
-		if (tvshow && !seasons) {
-			this.props.fetchSeasons(tvshow);
-		}
-		if (tvshow && !episodes) {
-			this.props.fetchEpisodes(tvshow);
-		}
 
 		return [
 			React.DOM.ol(
@@ -504,23 +514,53 @@ var NowPlaying = React.createClass({
 		];
 	},
 	renderEpisode: function() {
-		var episode = find(this.props.episodes[this.props.active.item] || [], function(episode) {
+		var episodeIndex = indexOf(this.props.episodes[this.props.active.item] || [], function(episode) {
 			return (episode.season === this.props.active.season &&
 					episode.episode === this.props.active.episode);
 		}, this);
 
-		if (!episode) {
+		if (episodeIndex === -1) {
 			return;
 		}
 
+		var tvshow = this.props.tvshows[this.props.active.item];
+		var prevEpisode = this.props.episodes[this.props.active.item][episodeIndex - 1];
+		var nextEpisode = this.props.episodes[this.props.active.item][episodeIndex + 1];
+		var episode = this.props.episodes[this.props.active.item][episodeIndex];
+
 		return [
-			React.DOM.img({src: toAssetSource(episode.thumbnail)}),
-			React.DOM.h3({
-				className: "episode--title"
-			}, episode.title),
-			React.DOM.p({
-				className: "plot"
-			}, episode.plot),
+			React.DOM.a(
+				{
+					className: toClassName({
+						"episode--previous": true,
+						"hidden": !prevEpisode
+					}),
+					href: prevEpisode ? Episode.linkTo(tvshow, prevEpisode) : null
+				},
+				(prevEpisode ? "S" + leftPad(prevEpisode.season) + "E" + leftPad(prevEpisode.episode) : "")
+			),
+			React.DOM.a(
+				{
+					className: toClassName({
+						"episode--next": true,
+						"hidden": !nextEpisode
+					}),
+					href: nextEpisode ? Episode.linkTo(tvshow, nextEpisode) : null
+				},
+				(nextEpisode ? "S" + leftPad(nextEpisode.season) + "E" + leftPad(nextEpisode.episode) : "")
+			),
+			React.DOM.div(
+				{
+					id: "tvshow-episode-view"
+				},
+				React.DOM.img({src: toAssetSource(episode.thumbnail)}),
+				React.DOM.h3({
+					className: "episode--title"
+				}, episode.title),
+				React.DOM.p({
+					className: "plot"
+				}, episode.plot)
+			),
 			CastList({
 				cast: episode.cast
 			})
