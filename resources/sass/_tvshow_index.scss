@@ -1,5 +1,12 @@
 /* Styles for the TV Show display (season/episode selection) */
 #tvshow-index {
+	.tvshow {
+		&, a, img {
+			width: 100%;
+		}
+
+	}
+
 	.seasons {
 		white-space: nowrap;
 	}

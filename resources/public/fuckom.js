@@ -267,23 +267,26 @@ var RootComponent = React.createClass({
 					id: "top-navigation",
 				},
 				React.DOM.a({
-					className: (this.state.active.type === "remote"
-								? "active"
-								: ""),
+					className: toClassName({
+						"icon-calculator": true,
+						"active": (this.state.active.type === "remote")
+					}),
 					href: "#/remote"
-				}, "Remote"),
+				}),
 				React.DOM.a({
 					className: toClassName({
+						"icon-tv": true,
 						"active": (["tvshow-index", "tvshow-episode-index", "tvshow-episode-detail"].indexOf(this.state.active.type) > -1)
 					}),
 					href: "#/tv-shows"
-				}, "TV Shows"),
+				}),
 				React.DOM.a({
 					className: toClassName({
+						"icon-camera": true,
 						"active": (["movie-index", "movie-detail"].indexOf(this.state.active.type) > -1)
 					}),
 					href: "#/movies"
-				}, "Movies")
+				})
 			),
 			Remote({
 				active: this.state.active
