@@ -57,6 +57,37 @@ var toClassName = function(o) {
 	return r.join(' ');
 }
 
+var Time = function(t) {
+	this._date = new Date((t.hours || 0) * 3600 * 60 * 1000 +
+						  (t.minutes || 0) * 60 * 1000 +
+						  (t.seconds || 0) * 1000 +
+						  (t.milliseconds || 0));
+};
+Time.prototype.getHours = function() {
+	return this._date.getUTCHours();
+};
+Time.prototype.getMinutes = function() {
+	return this._date.getUTCMinutes();
+};
+Time.prototype.getSeconds = function() {
+	return this._date.getUTCSeconds();
+};
+Time.prototype.getMilliseconds = function() {
+	return this._date.getUTCMilliseconds();
+};
+Time.prototype.add = function(ms) {
+	this._date.setUTCMilliseconds(this._date.getUTCMilliseconds() + ms);
+};
+Time.prototype.toString = function() {
+	var result = [];
+	var hrs = this.getHours();
+	if (hrs > 0) {
+		result.push(hrs);
+	}
+	result.push(leftPad(this.getMinutes()), leftPad(this.getSeconds()));
+	return result.join(":");
+};
+
 var Xbmc = (function() {
 	var command_id = 1;
 
@@ -71,12 +102,181 @@ var Xbmc = (function() {
 					id: command_id++,
 					method: command,
 					jsonrpc: "2.0",
-					params: data
+					params: data || {}
 				})
 			});
 		}
 	};
 })();
+
+var Player = {
+	ACTIVE_PLAYER_PROPERTIES: [
+		"type",
+		"partymode",
+		"speed",
+		"time",
+		"percentage",
+		"totaltime",
+		"playlistid",
+		"position",
+		"repeat",
+		"shuffled",
+		"canseek",
+		"canchangespeed",
+		"canmove",
+		"canzoom",
+		"canrotate",
+		"canshuffle",
+		"canrepeat",
+		"currentaudiostream",
+		"audiostreams",
+		"subtitleenabled",
+		"currentsubtitle",
+		"subtitles",
+		"live"
+	],
+	ACTIVE_ITEM_PROPERTIES: [
+		"title",
+		"artist",
+		"albumartist",
+		"genre",
+		"year",
+		"rating",
+		"album",
+		"track",
+		"duration",
+		"comment",
+		"lyrics",
+		"musicbrainztrackid",
+		"musicbrainzartistid",
+		"musicbrainzalbumid",
+		"musicbrainzalbumartistid",
+		"playcount",
+		"fanart",
+		"director",
+		"trailer",
+		"tagline",
+		"plot",
+		"plotoutline",
+		"originaltitle",
+		"lastplayed",
+		"writer",
+		"studio",
+		"mpaa",
+		"cast",
+		"country",
+		"imdbnumber",
+		"premiered",
+		"productioncode",
+		"runtime",
+		"set",
+		"showlink",
+		"streamdetails",
+		"top250",
+		"votes",
+		"firstaired",
+		"season",
+		"episode",
+		"showtitle",
+		"thumbnail",
+		"file",
+		"resume",
+		"artistid",
+		"albumid",
+		"tvshowid",
+		"setid",
+		"watchedepisodes",
+		"disc",
+		"tag",
+		"art",
+		"genreid",
+		"displayartist",
+		"albumartistid",
+		"description",
+		"theme",
+		"mood",
+		"style",
+		"albumlabel",
+		"sorttitle",
+		"episodeguide",
+		"uniqueid",
+		"dateadded",
+		"channel",
+		"channeltype",
+		"hidden",
+		"locked",
+		"channelnumber",
+		"starttime",
+		"endtime"
+	],
+	_getActivePlayer: function() {
+		return Xbmc.sendCommand("Player.GetActivePlayers").
+			then(function(response) {
+				return response.result && response.result[0];
+			});
+	},
+	_getProperties: function(playerId) {
+		return Xbmc.sendCommand("Player.GetProperties", {
+			playerid: playerId,
+			properties: Player.ACTIVE_PLAYER_PROPERTIES
+		}).then(function(response) {
+			response.result.time = new Time(response.result.time);
+			response.result.totaltime = new Time(response.result.totaltime);
+			return response.result;
+		});
+	},
+	_getItem: function(playerId) {
+		return Xbmc.sendCommand("Player.GetItem", {
+			playerid: playerId,
+			properties: Player.ACTIVE_ITEM_PROPERTIES
+		}).then(function(response) {
+			return response.result && response.result.item;
+		});
+	},
+	_doPoll: function() {
+		Player._getActivePlayer().
+			then(function(player) {
+				if (player.playerid) {
+					return $.when(Player._getProperties(player.playerid),
+								  Player._getItem(player.playerid));
+				} else {
+					Player.onUpdate.fire(null, null);
+				}
+			}).then(function(playerProperties, activeItem) {
+				if (playerProperties && activeItem) {
+					Player.onUpdate.fire(playerProperties, activeItem);
+
+					if (Player._timeUpdate) {
+						clearTimeout(Player._timeUpdate);
+					}
+					if (playerProperties.speed !== 0) {
+						var lastUpdate = Date.now();
+						var updateTime = function() {
+							var now = Date.now();
+
+							playerProperties.time.add(now - lastUpdate);
+							lastUpdate = now;
+
+							Player.onUpdate.fire(playerProperties, activeItem);
+							Player._timeUpdate = setTimeout(updateTime, Math.abs((1000 - playerProperties.time.getMilliseconds())/ playerProperties.speed));
+						};
+						Player._timeUpdate = setTimeout(updateTime, Math.abs((1000 - playerProperties.time.getMilliseconds())/ playerProperties.speed));
+					}
+				}
+			});
+	},
+	_timeUpdate: null,
+	onUpdate: $.Callbacks(),
+	setPolling: function(enable) {
+		if (enable && !Player._poll) {
+			Player._poll = setInterval(Player._doPoll, 5000);
+			Player._doPoll();
+		} else if (!enable && Player._poll) {
+			clearInterval(Player._poll);
+			Player._poll = null;
+		}
+	}
+};
 
 var Movie = {
 	fetch: function() {
@@ -229,6 +429,7 @@ var Route = function(destination) {
 };
 
 var RootComponent = React.createClass({
+	_playerPoll: null,
 	getInitialState: function() {
 		return {
 			active: {
@@ -256,6 +457,9 @@ var RootComponent = React.createClass({
 			this.setState(newState);
 		}.bind(this));
 
+		Player.onUpdate.add(this.updatePlayer);
+		Player.setPolling(true);
+
 		this.setState(Route(window.location.hash.toString().substr(1)));
 	},
 	fetchSeasons: function(tvshow) {
@@ -272,6 +476,12 @@ var RootComponent = React.createClass({
 			});
 		}.bind(this));
 	},
+	updatePlayer: function(playerState, activeItem) {
+		this.setState({
+			player: playerState,
+			activeItem: activeItem
+		});
+	},
 	render: function() {
 		return React.DOM.div(
 			{
@@ -283,26 +493,35 @@ var RootComponent = React.createClass({
 				},
 				React.DOM.a({
 					className: toClassName({
-						"icon-calculator": true,
+						"fa": true,
+						// TODO - better icon for remote
+						"fa-th": true,
 						"active": (this.state.active.type === "remote")
 					}),
 					href: "#/remote"
 				}),
 				React.DOM.a({
 					className: toClassName({
-						"icon-tv": true,
+						"fa": true,
+						// TODO - better icon for TV
+						"fa-desktop": true,
 						"active": (["tvshow-index", "tvshow-episode-index", "tvshow-episode-detail"].indexOf(this.state.active.type) > -1)
 					}),
 					href: "#/tv-shows"
 				}),
 				React.DOM.a({
 					className: toClassName({
-						"icon-camera": true,
+						"fa": true,
+						"fa-film": true,
 						"active": (["movie-index", "movie-detail"].indexOf(this.state.active.type) > -1)
 					}),
 					href: "#/movies"
 				})
 			),
+			PlayerStatus({
+				player: this.state.player,
+				activeItem: this.state.activeItem
+			}),
 			Remote({
 				active: this.state.active
 			}),
@@ -342,6 +561,53 @@ var Remote = React.createClass({
 		);
 	}
 });
+
+var PlayerStatus = React.createClass({
+	formatTime: function(time) {
+		var result = [];
+		if (time.hours > 0) {
+			result.push(time.hours);
+		}
+		result.push(time.minutes, time.seconds);
+		return result.join(":");
+	},
+	render: function() {
+		var args = [{
+			id: "player-status",
+			className: toClassName({
+				"active": this.props.player !== null
+			})
+		}];
+		if (this.props.player) {
+			args.push(
+				React.DOM.span(
+					{
+						className: toClassName({
+							"fa": true,
+							"fa-play": this.props.player.speed !== 0,
+							"fa-pause": this.props.player.speed === 0
+						})
+					}
+				),
+				React.DOM.div(
+					{
+						className: "elapsed-time"
+					},
+					this.props.player.time.toString(),
+					" / ",
+					this.props.player.totaltime.toString()
+				),
+				React.DOM.span(
+					{
+						className: "player-status--item-name"
+					},
+					this.props.activeItem.title
+				)
+			);
+		}
+		return React.DOM.div.apply(React.DOM, args);
+	}
+})
 
 var MovieIndex = React.createClass({
 	render: function() {

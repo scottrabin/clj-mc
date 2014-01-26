@@ -1,15 +1,17 @@
 // Top navigation
+@import "_mixins.scss";
+
 #top-navigation {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-around;
 	align-content: stretch;
 
-	height: 60px;
+	height: $navigation-height;
 
 	a {
 		display: inline-block;
-		line-height: 55px;
+		line-height: $navigation-height;
 		width: 40px;
 		text-align: center;
 

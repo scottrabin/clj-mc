@@ -1,6 +1,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: Helvetica, Verdana, Arial, sans-serif; }
 
-@import "_icons.scss";
+$fa-font-path: "../assets/font-awesome";
+@import "font-awesome/font-awesome.scss";
 
 html, body { height: 100%; }
 
@@ -35,6 +36,7 @@ a:visited {
 }
 
 @import "_navigation.scss";
+@import "_player_status.scss";
 @import "_movie_index.scss";
 @import "_tvshow_index.scss";
 

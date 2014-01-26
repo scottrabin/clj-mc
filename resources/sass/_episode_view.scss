@@ -21,6 +21,7 @@
 
 	.episode--next {
 		float: right;
+		text-align: right;
 
 		&::after {
 			content: "\203a";
