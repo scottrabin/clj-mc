@@ -17,7 +17,7 @@ define(function(require) {
 				$.map(this.props.movies, function(movie, slug) {
 					return React.DOM.li(
 						{
-							key: slug,
+							key: movie.getId(),
 							className: "movie"
 						},
 						React.DOM.a(

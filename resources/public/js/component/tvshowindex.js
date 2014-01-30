@@ -90,7 +90,7 @@ define(function(require) {
 
 			return React.DOM.li(
 				{
-					key: episode.getUrl(),
+					key: episode.getId(),
 					className: toClassName({
 						"episode": true,
 						"hidden": (this.state.season !== episode.getSeason())
