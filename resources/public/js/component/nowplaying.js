@@ -1,17 +1,36 @@
 define(function(require) {
 	"use strict";
 	var React = require('React');
+	var Player = require('service/player');
 
-	var Episode = require('service/episode');
 	var CastList = require('component/castlist');
 
 	var indexOf = require('util/indexof');
 	var leftPad = require('util/leftpad');
-	var toAssetSource = require('util/toassetsource');
 	var toClassName = require('util/toclassname');
+
+	var TYPE_TVSHOW = 'tvshow';
+	var TYPE_MOVIE = 'movie';
 
 	return React.createClass({
 		displayName: "NowPlaying",
+		getType: function() {
+			return (this.props.active.type === 'tvshow-episode-detail' ? TYPE_TVSHOW : TYPE_MOVIE);
+		},
+		playItem: function() {
+			var item;
+			if (this.getType() === TYPE_MOVIE) {
+				item = this.props.movies[this.props.active.item];
+			} else {
+				var episodeIndex = indexOf(this.props.episodes[this.props.active.item] || [], function(episode) {
+					return (episode.getSeason() === this.props.active.season &&
+							episode.getEpisode() === this.props.active.episode);
+				}, this);
+				item = this.props.episodes[this.props.active.item][episodeIndex];
+			}
+
+			Player.play(item);
+		},
 		renderMovie: function() {
 			var movie = this.props.movies[this.props.active.item];
 
@@ -28,7 +47,8 @@ define(function(require) {
 					},
 					React.DOM.img({
 						className: "movie--poster",
-						src: movie.getArt('poster')
+						src: movie.getArt('poster'),
+						onClick: this.playItem
 					}),
 					React.DOM.h3({
 						className: "movie--title"
@@ -83,7 +103,10 @@ define(function(require) {
 					{
 						id: "tvshow-episode-view"
 					},
-					React.DOM.img({src: episode.getArt('thumb')}),
+					React.DOM.img({
+						src: episode.getArt('thumb'),
+						onClick: this.playItem
+					}),
 					React.DOM.h3({
 						className: "episode--title"
 					}, episode.getTitle()),
@@ -100,13 +123,9 @@ define(function(require) {
 			return React.DOM.section(
 				{
 					id: "now-playing",
-					className: toClassName([
-						(this.props.active.type === 'tvshow-episode-detail' ? 'tvshow' : 'movie')
-					])
+					className: this.getType()
 				},
-				(this.props.active.type === 'tvshow-episode-detail'
-				 ? this.renderEpisode()
-				 : this.renderMovie())
+				(this.getType() === TYPE_TVSHOW ? this.renderEpisode() : this.renderMovie())
 			);
 		}
 	});

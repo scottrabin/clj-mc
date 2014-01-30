@@ -249,6 +249,29 @@ define(function(require) {
 	};
 
 	/**
+	 * Play the given item
+	 *
+	 * @param {Movie|Episode} item
+	 */
+	Player.play = function(item) {
+		var cmd;
+		if (item.getType() === 'movie') {
+			cmd = Xbmc.sendCommand('Player.Open', {
+				item: {
+					movieid: item.getId()
+				}
+			});
+		} else {
+			cmd = Xbmc.sendCommand('Player.Open', {
+				item: {
+					episodeid: item.getId()
+				}
+			});
+		}
+		cmd.then(_doPoll);
+	};
+
+	/**
 	 * Stop playing the current item
 	 *
 	 * @param {Object} player

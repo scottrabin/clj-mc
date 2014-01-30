@@ -8,6 +8,24 @@ define(function(require) {
 	}
 
 	/**
+	 * Get the id of this item
+	 *
+	 * @return {Number}
+	 */
+	Movie.prototype.getId = function() {
+		return this._movie.movieid;
+	};
+
+	/**
+	 * Get the type of this item (movie)
+	 *
+	 * @return {String}
+	 */
+	Movie.prototype.getType = function() {
+		return 'movie';
+	};
+
+	/**
 	 * Get the title of the movie
 	 *
 	 * @return {String}

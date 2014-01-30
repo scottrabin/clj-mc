@@ -10,6 +10,24 @@ define(function(require) {
 	}
 
 	/**
+	 * Get the id of this item
+	 *
+	 * @return {Number}
+	 */
+	Episode.prototype.getId = function() {
+		return this._episode.episodeid;
+	};
+
+	/**
+	 * Get the type of this item (episode)
+	 *
+	 * @return {String}
+	 */
+	Episode.prototype.getType = function() {
+		return 'episode';
+	};
+
+	/**
 	 * Get the season number for this episode
 	 *
 	 * @return {Number}
