@@ -16,18 +16,44 @@ define(function(require) {
 	var NowPlaying = require('component/nowplaying');
 
 	var assoc = require('util/assoc');
+	var indexOf = require('util/indexof');
 	var toClassName = require('util/toclassname');
 	var toSlug = require('util/toslug');
 
 	var RootComponent = React.createClass({
 		getInitialState: function() {
 			return {
+				/**
+				 * The currently playing item
+				 * @type {Movie|Episode}
+				 */
+				playing: {},
+				/**
+				 * The currently active screen for the application
+				 * @type {Object}
+				 */
 				active: {
 					type: "remote"
 				},
+				/**
+				 * The cached set of movies
+				 * @type {Object.<string, Movie>}
+				 */
 				movies: {},
+				/**
+				 * The cached set of TV shows
+				 * @type {Object.<string, TVShow>}
+				 */
 				tvshows: {},
+				/**
+				 * The cached set of seasons for all TV shows
+				 * @type {Object.<string, Array<Season>>}
+				 */
 				seasons: {},
+				/**
+				 * The cached set of episodes for all TV shows
+				 * @type {Object.<string, Array<Episode>>}
+				 */
 				episodes: {}
 			};
 		},
@@ -66,13 +92,46 @@ define(function(require) {
 				});
 			}.bind(this));
 		},
-		updatePlayer: function(playerState, activeItem) {
+		updatePlayer: function(playerState, playing) {
 			this.setState({
 				player: playerState,
-				activeItem: activeItem
+				playing: playing
 			});
 		},
+		getPlayingItem: function(playing) {
+			switch (playing.type) {
+			case 'movie':
+				return this.getMovie(toSlug(playing.title));
+			case 'episode':
+				return this.getEpisode(
+					toSlug(playing.showtitle),
+					playing.season,
+					playing.episode
+				);
+			default:
+				return null;
+			}
+		},
+		getMovie: function(slug) {
+			return this.state.movies[slug];
+		},
+		getEpisode: function(slug, seasonNum, episodeNum) {
+			if (!this.state.episodes[slug]) {
+				var tvshow = this.state.tvshows[slug];
+				if (tvshow) {
+					this.fetchEpisodes(tvshow);
+				}
+				return;
+			}
+			var index = indexOf(this.state.episodes[slug], function(episode) {
+				return (episode.getSeason() === seasonNum &&
+						episode.getEpisode() === episodeNum);
+			});
+			return this.state.episodes[slug][index];
+		},
 		render: function() {
+			var playing = this.getPlayingItem(this.state.playing);
+
 			return React.DOM.div(
 				{
 					id: "main",
@@ -110,7 +169,7 @@ define(function(require) {
 				),
 				PlayerStatus({
 					player: this.state.player,
-					activeItem: this.state.activeItem
+					playing: playing
 				}),
 				Remote({
 					active: this.state.active

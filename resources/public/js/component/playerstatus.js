@@ -13,7 +13,7 @@ define(function(require) {
 					"active": this.props.player !== null
 				})
 			}];
-			if (this.props.player) {
+			if (this.props.player && this.props.playing) {
 				args.push(
 					React.DOM.span(
 						{
@@ -32,11 +32,12 @@ define(function(require) {
 						" / ",
 						this.props.player.totaltime.toString()
 					),
-					React.DOM.span(
+					React.DOM.a(
 						{
+							href: this.props.playing.getUrl(),
 							className: "player-status--item-name"
 						},
-						this.props.activeItem.title
+						this.props.playing.getTitle()
 					)
 				);
 			}
