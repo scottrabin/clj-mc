@@ -207,7 +207,7 @@ define(function(require) {
 	 */
 	Player.setPolling = function(enable) {
 		if (enable && !Player._poll) {
-			Player._poll = setInterval(Player._doPoll, 5000);
+			Player._poll = setInterval(_doPoll, 5000);
 			_doPoll();
 		} else if (!enable && Player._poll) {
 			clearInterval(Player._poll);
