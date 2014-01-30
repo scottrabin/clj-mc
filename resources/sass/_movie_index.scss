@@ -10,18 +10,21 @@
 
 		vertical-align: top;
 
-		@include small-screen {
-			margin: 5px 1%;
+		@include at-width(0, $movie-poster-width * 3 + $movie-poster-spacing * 2 * 2) {
+			margin: $movie-poster-spacing 1%;
 			width: 48%;
 		}
-		@include big-screen {
-			margin: 5px;
-			width: ($site-width / 2) - 20px;
+		@include at-width($movie-poster-width * 3 + $movie-poster-spacing * 2 * 2, $movie-poster-width * 4 + $movie-poster-spacing * 2 * 3 + 20px) {
+			margin: $movie-poster-spacing 1%;
+			width: 31%;
+		}
+		@include at-width($movie-poster-width * 4 + $movie-poster-spacing * 2 * 3 + 20px) {
+			margin: $movie-poster-spacing;
+			width: $movie-poster-width;
 		}
 
 		a {
 			display: inline-block;
-			height: 295px;
 			width: 100%;
 			padding: 6px;
 		}

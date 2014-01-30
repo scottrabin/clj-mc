@@ -7,6 +7,27 @@ $icon-size: 24px;
 $remote-button-size: 46px;
 $remote-button-spacing: 8px;
 
+$movie-poster-spacing: 5px;
+$movie-poster-width: 175px;
+
+@mixin at-width($min-width: 0, $max-width: null) {
+	@if ($min-width > 0) {
+		@if ($max-width == null) {
+			@media only screen and (min-width: $min-width) {
+				@content;
+			}
+		} @else {
+			@media only screen and (min-width: $min-width) and (max-width: $max-width) {
+				@content;
+			}
+		}
+	} @else if ($max-width != null) {
+		@media only screen and (max-width: $max-width) {
+			@content;
+		}
+	}
+}
+
 @mixin small-screen {
 	@media only screen and (max-width: $site-width) {
 		@content;
