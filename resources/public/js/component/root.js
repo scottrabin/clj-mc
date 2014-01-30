@@ -55,14 +55,14 @@ define(function(require) {
 		fetchSeasons: function(tvshow) {
 			Season.fetch(tvshow).then(function(seasons) {
 				this.setState({
-					seasons: assoc(this.state.seasons, toSlug(tvshow.title), seasons)
+					seasons: assoc(this.state.seasons, toSlug(tvshow.getTitle()), seasons)
 				});
 			}.bind(this));
 		},
 		fetchEpisodes: function(tvshow) {
 			Episode.fetch(tvshow).then(function(episodes) {
 				this.setState({
-					episodes: assoc(this.state.episodes, toSlug(tvshow.title), episodes)
+					episodes: assoc(this.state.episodes, toSlug(tvshow.getTitle()), episodes)
 				});
 			}.bind(this));
 		},

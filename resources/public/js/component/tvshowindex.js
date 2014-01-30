@@ -38,7 +38,7 @@ define(function(require) {
 			if (props.active.hasOwnProperty('season')) {
 				season = props.active.season;
 			} else if (props.seasons[props.active.item]) {
-				season = props.seasons[props.active.item][first(props.seasons[props.active.item])].season;
+				season = props.seasons[props.active.item][first(props.seasons[props.active.item])].getSeason();
 			}
 			this.setState({
 				season: +season
@@ -53,9 +53,9 @@ define(function(require) {
 					},
 					React.DOM.a(
 						{
-							href: TVShow.linkTo(tvshow)
+							href: tvshow.getUrl()
 						},
-						React.DOM.img({src: toAssetSource(tvshow.art.banner)})
+						React.DOM.img({src: tvshow.getArt('banner')})
 					)
 				);
 			});
@@ -65,22 +65,22 @@ define(function(require) {
 
 			return React.DOM.li(
 				{
-					key: (this.props.active.item + "--S" + leftPad(season.season, 2)),
+					key: season.getUrl(),
 					className: toClassName({
 						"season": true,
-						"active": (this.state.season === season.season)
+						"active": (this.state.season === season.getSeason())
 					})
 				},
 				React.DOM.a(
 					{
-						href: Season.linkTo(tvshow, season)
+						href: season.getUrl()
 					},
-					React.DOM.img({src: toAssetSource(season.art.poster)}),
+					React.DOM.img({src: season.getArt('poster')}),
 					React.DOM.span(
 						{
 							className: "season--number"
 						},
-						season.season
+						season.getSeason()
 					)
 				)
 			);
@@ -90,31 +90,31 @@ define(function(require) {
 
 			return React.DOM.li(
 				{
-					key: (this.props.active.item + "--S" + leftPad(episode.season, 2) + "E" + leftPad(episode.episode, 2)),
+					key: episode.getUrl(),
 					className: toClassName({
 						"episode": true,
-						"hidden": (this.state.season !== episode.season)
+						"hidden": (this.state.season !== episode.getSeason())
 					})
 				},
 				React.DOM.a(
 					{
-						href: Episode.linkTo(tvshow, episode)
+						href: episode.getUrl()
 					},
-					React.DOM.img({src: toAssetSource(episode.art.thumb)}),
+					React.DOM.img({src: episode.getArt('thumb')}),
 					React.DOM.div(
 						{
 							className: "episode--metadata"
 						},
 						React.DOM.div({
 							className: "episode--serial"
-						}, "S: " + episode.season + " E: " + episode.episode),
+						}, "S: " + episode.getSeason() + " E: " + episode.getEpisode()),
 						React.DOM.div({
 							className: "episode--airdate"
-						}, episode.firstaired)
+						}, episode.getFirstAired())
 					),
 					React.DOM.h3({
 						className: "episode--title"
-					}, episode.title)
+					}, episode.getTitle())
 				)
 			);
 		},

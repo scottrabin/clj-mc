@@ -1,17 +1,18 @@
 define(function(require) {
 	"use strict";
 	var Xbmc = require('service/xbmc');
+	var Movie = require('type/movie');
 
 	var toSlug = require('util/toslug');
 
-	var Movie = {};
+	var MovieService = {};
 
 	/**
 	 * Fetch the set of movies from the Xbmc server
 	 *
 	 * @return {$.Deferred}
 	 */
-	Movie.fetch = function() {
+	MovieService.fetch = function() {
 		return Xbmc.sendCommand("VideoLibrary.GetMovies", {
 			properties: [
 				"title", "genre", "year", "rating", "director", "trailer",
@@ -21,24 +22,14 @@ define(function(require) {
 				"thumbnail", "file", "sorttitle", "resume", "setid", "dateadded", "tag", "art"
 			]
 		}).then(function(response) {
-			console.log("[ Movie.fetch ] response:", response);
+			console.log("[ MovieService.fetch ] response:", response);
 
 			return response.result.movies.reduce(function(r, movie) {
-				r[toSlug(movie.title)] = movie;
+				r[toSlug(movie.title)] = new Movie(movie);
 				return r;
 			}, {});
 		});
 	};
 
-	/**
-	 * Return the link to a specific movie
-	 *
-	 * @param {Movie} movie
-	 * @return {String}
-	 */
-	Movie.linkTo = function(movie) {
-		return "#/movies/" + toSlug(movie.title);
-	};
-
-	return Movie;
+	return MovieService;
 });

@@ -1,9 +1,7 @@
 define(function(require) {
 	"use strict";
 	var React = require('React');
-	var Movie = require('service/movie');
 	var toClassName = require('util/toclassname');
-	var toAssetSource = require('util/toassetsource');
 
 	return React.createClass({
 		displayName: "MovieIndex",
@@ -24,12 +22,12 @@ define(function(require) {
 						},
 						React.DOM.a(
 							{
-								href: Movie.linkTo(movie)
+								href: movie.getUrl()
 							},
-							React.DOM.img({src: toAssetSource(movie.art.poster)}),
+							React.DOM.img({src: movie.getArt('poster')}),
 							React.DOM.span(
 								{className: "movie--name"},
-								movie.title
+								movie.getTitle()
 							)
 						)
 					);

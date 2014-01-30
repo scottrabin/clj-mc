@@ -28,25 +28,25 @@ define(function(require) {
 					},
 					React.DOM.img({
 						className: "movie--poster",
-						src: toAssetSource(movie.art.poster)
+						src: movie.getArt('poster')
 					}),
 					React.DOM.h3({
 						className: "movie--title"
-					}, movie.title),
+					}, movie.getTitle()),
 					React.DOM.p({
 						className: "plot"
-					}, movie.plot)
+					}, movie.getPlot())
 				),
 				CastList({
 					key: "cast",
-					cast: movie.cast
+					cast: movie.getCast()
 				})
 			];
 		},
 		renderEpisode: function() {
 			var episodeIndex = indexOf(this.props.episodes[this.props.active.item] || [], function(episode) {
-				return (episode.season === this.props.active.season &&
-						episode.episode === this.props.active.episode);
+				return (episode.getSeason() === this.props.active.season &&
+						episode.getEpisode() === this.props.active.episode);
 			}, this);
 
 			if (episodeIndex === -1) {
@@ -65,9 +65,9 @@ define(function(require) {
 							"episode--previous": true,
 							"hidden": !prevEpisode
 						}),
-						href: prevEpisode ? Episode.linkTo(tvshow, prevEpisode) : null
+						href: prevEpisode ? prevEpisode.getUrl() : null
 					},
-					(prevEpisode ? "S" + leftPad(prevEpisode.season) + "E" + leftPad(prevEpisode.episode) : "")
+					(prevEpisode ? "S" + leftPad(prevEpisode.getSeason()) + "E" + leftPad(prevEpisode.getEpisode()) : "")
 				),
 				React.DOM.a(
 					{
@@ -75,24 +75,24 @@ define(function(require) {
 							"episode--next": true,
 							"hidden": !nextEpisode
 						}),
-						href: nextEpisode ? Episode.linkTo(tvshow, nextEpisode) : null
+						href: nextEpisode ? nextEpisode.getUrl() : null
 					},
-					(nextEpisode ? "S" + leftPad(nextEpisode.season) + "E" + leftPad(nextEpisode.episode) : "")
+					(nextEpisode ? "S" + leftPad(nextEpisode.getSeason()) + "E" + leftPad(nextEpisode.getEpisode()) : "")
 				),
 				React.DOM.div(
 					{
 						id: "tvshow-episode-view"
 					},
-					React.DOM.img({src: toAssetSource(episode.thumbnail)}),
+					React.DOM.img({src: episode.getArt('thumb')}),
 					React.DOM.h3({
 						className: "episode--title"
-					}, episode.title),
+					}, episode.getTitle()),
 					React.DOM.p({
 						className: "plot"
-					}, episode.plot)
+					}, episode.getPlot())
 				),
 				CastList({
-					cast: episode.cast
+					cast: episode.getCast()
 				})
 			];
 		},
