@@ -165,14 +165,16 @@ define(function(require) {
 	 */
 	var _doPoll = function() {
 		_getActivePlayer().then(function(player) {
-			if (player.playerid) {
-				return $.when(_getProperties(player.playerid),
+			if (player && player.playerid) {
+				return $.when(player.playerid,
+							  _getProperties(player.playerid),
 							  _getItem(player.playerid));
 			} else {
-				Player.onUpdate.fire(null, null);
+				Player.onUpdate.fire({}, {});
 			}
-		}).then(function(playerProperties, activeItem) {
+		}).then(function(playerid,  playerProperties, activeItem) {
 			if (playerProperties && activeItem) {
+				playerProperties.playerid = playerid;
 				Player.onUpdate.fire(playerProperties, activeItem);
 
 				if (_timeUpdate) {
@@ -213,6 +215,62 @@ define(function(require) {
 			clearInterval(Player._poll);
 			Player._poll = null;
 		}
+	};
+
+	/**
+	 * Set the speed of the player to the given value
+	 *
+	 * @param {Object} player
+	 * @param {String|Number} speed
+	 */
+	Player.setSpeed = function(player, speed) {
+		Xbmc.sendCommand('Player.SetSpeed', {
+			playerid: player.playerid,
+			speed: speed
+		}).then(_doPoll);
+	};
+
+	/**
+	 * Increase the speed of the current player
+	 *
+	 * @param {Object} player
+	 */
+	Player.increaseSpeed = function(player) {
+		Player.setSpeed(player, 'increment');
+	};
+
+	/**
+	 * Decrease the speed of the current player
+	 *
+	 * @param {Object} player
+	 */
+	Player.decreaseSpeed = function(player) {
+		Player.setSpeed(player, 'decrement');
+	};
+
+	/**
+	 * Stop playing the current item
+	 *
+	 * @param {Object} player
+	 */
+	Player.stop = function(player) {
+		Xbmc.sendCommand('Player.Stop', {
+			playerid: player.playerid
+		});
+	};
+
+	/**
+	 * Set the subtitle
+	 *
+	 * @param {Object} player
+	 * @param {Object} subtitle
+	 */
+	Player.setSubtitle = function(player, subtitle) {
+		Xbmc.sendCommand('Player.SetSubtitle', {
+			playerid: player.playerid,
+			enable: subtitle.index !== 'off',
+			subtitle: subtitle.index
+		}).then(_doPoll);
 	};
 
 	return Player;

@@ -24,6 +24,11 @@ define(function(require) {
 		getInitialState: function() {
 			return {
 				/**
+				 * The state of the current player
+				 * @type {Object}
+				 */
+				player: {},
+				/**
 				 * The currently playing item
 				 * @type {Movie|Episode}
 				 */
@@ -172,7 +177,9 @@ define(function(require) {
 					playing: playing
 				}),
 				Remote({
-					active: this.state.active
+					active: this.state.active,
+					player: this.state.player,
+					playing: playing
 				}),
 				MovieIndex({
 					active: this.state.active,

@@ -2,6 +2,11 @@ $site-width: 420px;
 $navigation-height: 60px;
 $player-status-height: 24px;
 
+$icon-size: 24px;
+
+$remote-button-size: 46px;
+$remote-button-spacing: 8px;
+
 @mixin small-screen {
 	@media only screen and (max-width: $site-width) {
 		@content;
