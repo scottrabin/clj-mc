@@ -1,4 +1,5 @@
-$site-width: 420px;
+$site-width: 500px;
+$site-spacing: 6px;
 $navigation-height: 60px;
 $player-status-height: 24px;
 
@@ -34,8 +35,24 @@ $movie-poster-width: 175px;
 	}
 }
 
-@mixin big-screen {
+@mixin large-screen {
 	@media only screen and (min-width: $site-width) {
 		@content;
+	}
+}
+
+@mixin scroll($x: true, $y: true, $always: false) {
+	$val: if($always == true, scroll, auto);
+	@if ($x == true and $y == true) {
+		overflow: $val;
+		-webkit-overflow-scrolling: touch;
+	} @else if ($x == true) {
+		overflow: $val;
+		overflow-y: hidden;
+		-webkit-overflow-scrolling: touch;
+	} @else if ($y == true) {
+		overflow: $val;
+		overflow-x: hidden;
+		-webkit-overflow-scrolling: touch;
 	}
 }

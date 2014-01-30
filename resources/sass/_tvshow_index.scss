@@ -11,17 +11,17 @@
 
 	.seasons {
 		white-space: nowrap;
-		overflow: auto;
+		@include scroll($x: true, $y: false);
 
 		@include small-screen {
 			overflow-y: hidden;
 		}
-		@include big-screen {
+		@include large-screen {
 			float: left;
 			white-space: normal;
 			height: 100%;
 			padding-right: 10px;
-			overflow-x: hidden;
+			@include scroll($x: false, $y: true);
 		}
 	}
 
@@ -42,7 +42,7 @@
 			opacity: 1;
 		}
 
-		@include big-screen {
+		@include large-screen {
 			display: block;
 		}
 
@@ -68,10 +68,9 @@
 	}
 
 	.episodes {
-		@include big-screen {
+		@include large-screen {
 			height: 100%;
-			overflow: auto;
-			overflow-x: hidden;
+			@include scroll($x: false, $y: true);
 		}
 	}
 
