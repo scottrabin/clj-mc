@@ -37,7 +37,7 @@ define(function(require) {
 		clickDownButton: function() {
 			Menu.down();
 		},
-		clickSelectbutton: function() {
+		clickSelectButton: function() {
 			Menu.select();
 		},
 		clickStopButton: function() {
