@@ -3,7 +3,7 @@ define(function(require) {
 	var leftPad = require('util/leftpad');
 
 	var Time = function(t) {
-		this._date = new Date((t.hours || 0) * 3600 * 60 * 1000 +
+		this._date = new Date((t.hours || 0) * 3600 * 1000 +
 							  (t.minutes || 0) * 60 * 1000 +
 							  (t.seconds || 0) * 1000 +
 							  (t.milliseconds || 0));

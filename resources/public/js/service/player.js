@@ -4,7 +4,6 @@ define(function(require) {
 	var Time = require('util/time');
 
 	var Player = {};
-	var _timeUpdate = null;
 
 	/**
 	 * @const {Array}
@@ -173,13 +172,12 @@ define(function(require) {
 				Player.onUpdate.fire({}, {});
 			}
 		}).then(function(playerid,  playerProperties, activeItem) {
+			var _timeUpdate;
+
 			if (playerProperties && activeItem) {
 				playerProperties.playerid = playerid;
 				Player.onUpdate.fire(playerProperties, activeItem);
 
-				if (_timeUpdate) {
-					clearTimeout(_timeUpdate);
-				}
 				if (playerProperties.speed !== 0) {
 					var lastUpdate = Date.now();
 					var updateTime = function() {
@@ -192,6 +190,12 @@ define(function(require) {
 						_timeUpdate = setTimeout(updateTime, Math.abs((1000 - playerProperties.time.getMilliseconds())/ playerProperties.speed));
 					};
 					_timeUpdate = setTimeout(updateTime, Math.abs((1000 - playerProperties.time.getMilliseconds())/ playerProperties.speed));
+
+					// on next update, stop this timer
+					Player.onUpdate.add(function clearTimeUpdateLoop() {
+						clearTimeout(_timeUpdate);
+						Player.onUpdate.remove(clearTimeUpdateLoop);
+					});
 				}
 			}
 		});
