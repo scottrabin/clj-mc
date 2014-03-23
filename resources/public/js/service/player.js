@@ -176,7 +176,6 @@ define(function(require) {
 
 			if (playerProperties && activeItem) {
 				playerProperties.playerid = playerid;
-				Player.onUpdate.fire(playerProperties, activeItem);
 
 				if (playerProperties.speed !== 0) {
 					var lastUpdate = Date.now();
@@ -188,14 +187,15 @@ define(function(require) {
 
 						Player.onUpdate.fire(playerProperties, activeItem);
 						_timeUpdate = setTimeout(updateTime, Math.abs((1000 - playerProperties.time.getMilliseconds())/ playerProperties.speed));
+						// on next update, stop this timer
+						Player.onUpdate.add(function clearTimeUpdateLoop() {
+							clearTimeout(_timeUpdate);
+							Player.onUpdate.remove(clearTimeUpdateLoop);
+						});
 					};
-					_timeUpdate = setTimeout(updateTime, Math.abs((1000 - playerProperties.time.getMilliseconds())/ playerProperties.speed));
-
-					// on next update, stop this timer
-					Player.onUpdate.add(function clearTimeUpdateLoop() {
-						clearTimeout(_timeUpdate);
-						Player.onUpdate.remove(clearTimeUpdateLoop);
-					});
+					updateTime();
+				} else {
+					Player.onUpdate.fire(playerProperties, activeItem);
 				}
 			}
 		});
